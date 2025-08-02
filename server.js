@@ -1,9 +1,3 @@
-const express = require('express');
-const puppeteer = require('puppeteer');
-const app = express();
-
-app.use(express.json({ limit: '10mb' }));
-
 app.post('/generate', async (req, res) => {
   console.info('[INFO] /generate route hit');
   const { html } = req.body;
@@ -11,23 +5,17 @@ app.post('/generate', async (req, res) => {
 
   try {
     const browser = await puppeteer.launch({
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined, // fallback to bundled Chromium if env var missing
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
       headless: true,
     });
 
     const page = await browser.newPage();
-
-    console.info('[INFO] Setting page content');
-    // Change waitUntil to 'domcontentloaded' to avoid hang if resources never finish loading
+    await page.goto('about:blank');                     // This line fixes the error
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
 
-    console.info('[INFO] Taking screenshot');
     const buffer = await page.screenshot({ type: 'png', fullPage: true });
-
     await browser.close();
 
-    console.info('[INFO] Sending response');
     res.set('Content-Type', 'image/png');
     res.send(buffer);
   } catch (err) {
@@ -35,5 +23,3 @@ app.post('/generate', async (req, res) => {
     res.status(500).send('Error generating image');
   }
 });
-
-app.listen(3000, () => console.log('HTML-to-Image API running on port 3000'));
