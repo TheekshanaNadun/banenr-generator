@@ -1,40 +1,31 @@
-FROM node:18-slim
+FROM node:18-alpine
 
-# Install only what's needed
-RUN apt-get update && apt-get install -y \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libgdk-pixbuf2.0-0 \
-    libnspr4 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
-    wget \
+# Install dependencies Puppeteer needs on Alpine
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
     ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    ttf-freefont \
+    fontconfig \
+    bash
 
-# Set working dir
+# Set working directory
 WORKDIR /app
 
-# Copy files
+# Copy package files and install dependencies (puppeteer will download Chromium automatically)
 COPY package*.json ./
-
-# Install puppeteer with Chromium bundled
 RUN npm install
 
-# Copy rest of the app
+# Copy app source
 COPY . .
 
-# Expose port
+# Set env variable so Puppeteer uses installed chromium binary (optional but recommended)
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Expose port 3000
 EXPOSE 3000
 
-# Start server
+# Start your server
 CMD ["node", "server.js"]
