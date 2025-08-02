@@ -1,30 +1,29 @@
-FROM node:18-bullseye
+FROM node:18-alpine
 
-# Install necessary dependencies for Chromium (needed by Puppeteer)
-RUN apt-get update && apt-get install -y \
-    ca-certificates \
-    fonts-freefont-ttf \
-    libnss3 \
-    libfreetype6 \
-    libharfbuzz0b \
-    fontconfig \
+RUN apk add --no-cache \
     chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    fontconfig \
     bash \
-  && rm -rf /var/lib/apt/lists/*
+    libc6-compat
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
 
-# Install dependencies (this will download Chromium bundled with Puppeteer)
+# Skip Puppeteer’s Chromium download (too big and wrong arch)
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
 RUN npm install
 
-# Copy app source
 COPY . .
 
-# Expose port
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
 EXPOSE 3000
 
-# Puppeteer uses its own Chromium by default, so no need to set executable path
 CMD ["node", "server.js"]
