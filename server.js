@@ -21,6 +21,7 @@ app.post('/generate', async (req, res) => {
     const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
       headless: true,
+      timeout: 30000, // 30 seconds max for launch
     });
 
     const page = await browser.newPage();
