@@ -1,28 +1,40 @@
-FROM node:18-alpine
+FROM node:18-slim
 
-# Install dependencies
-RUN apk add --no-cache \
-  chromium \
-  nss \
-  freetype \
-  harfbuzz \
-  ca-certificates \
-  ttf-freefont \
-  nodejs \
-  yarn
+# Install only what's needed
+RUN apt-get update && apt-get install -y \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libgdk-pixbuf2.0-0 \
+    libnspr4 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    xdg-utils \
+    wget \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set environment variables
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
-# Create app directory
+# Set working dir
 WORKDIR /app
 
-# Copy package files and install
+# Copy files
 COPY package*.json ./
+
+# Install puppeteer with Chromium bundled
 RUN npm install
 
-# Copy the rest of the code
+# Copy rest of the app
 COPY . .
 
-# Run app
+# Expose port
+EXPOSE 3000
+
+# Start server
 CMD ["node", "server.js"]
