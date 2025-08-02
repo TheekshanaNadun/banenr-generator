@@ -1,33 +1,41 @@
-FROM node:18-alpine
-
-# Install dependencies for Chromium
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont \
-    nodejs \
-    npm
-
-# Set the working directory
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
+FROM node:18-slim
 
 # Install dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    ca-certificates \
+    fonts-liberation \
+    libappindicator3-1 \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libdbus-1-3 \
+    libnss3 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    xdg-utils \
+    --no-install-recommends && apt-get clean
+
+# Add user for puppeteer
+RUN groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
+    && mkdir -p /home/pptruser/Downloads \
+    && chown -R pptruser:pptruser /home/pptruser
+
+ENV PUPPETEER_SKIP_DOWNLOAD=false
+
+# Install puppeteer and your app
+WORKDIR /app
+COPY package*.json ./
 RUN npm install
 
-# Copy the rest of your app
 COPY . .
 
-# Set env for Puppeteer to use Chromium installed by APK
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+# Use non-root user
+USER pptruser
 
-# Expose port if needed
 EXPOSE 3000
 
-# Run your server
 CMD ["node", "server.js"]
