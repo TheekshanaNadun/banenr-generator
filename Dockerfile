@@ -1,27 +1,23 @@
 FROM node:18-bullseye
 
-# Install necessary dependencies for Chromium (bundled by Puppeteer)
-RUN apk add --no-cache \
-    nss \
-    freetype \
-    harfbuzz \
+# Install necessary dependencies for Chromium (needed by Puppeteer)
+RUN apt-get update && apt-get install -y \
     ca-certificates \
-    ttf-freefont \
+    fonts-freefont-ttf \
+    libnss3 \
+    libfreetype6 \
+    libharfbuzz0b \
     fontconfig \
     chromium \
-    # We include chromium here only for dependencies (you can remove 'chromium' if not required)
-    # but Puppeteer will use its own Chromium
-
     bash \
-    # Some Puppeteer dependencies for Alpine
-    && rm -rf /var/cache/apk/*
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (this downloads Chromium by Puppeteer)
+# Install dependencies (this will download Chromium bundled with Puppeteer)
 RUN npm install
 
 # Copy app source
@@ -30,6 +26,5 @@ COPY . .
 # Expose port
 EXPOSE 3000
 
-# No need to set PUPPETEER_EXECUTABLE_PATH; Puppeteer uses its own Chromium by default
-
+# Puppeteer uses its own Chromium by default, so no need to set executable path
 CMD ["node", "server.js"]
