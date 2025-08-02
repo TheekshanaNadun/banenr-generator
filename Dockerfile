@@ -1,41 +1,28 @@
-FROM node:18-slim
+FROM node:18-alpine
 
 # Install dependencies
-RUN apt-get update && apt-get install -y \
-    wget \
-    ca-certificates \
-    fonts-liberation \
-    libappindicator3-1 \
-    libasound2 \
-    libatk-bridge2.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdbus-1-3 \
-    libnss3 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    xdg-utils \
-    --no-install-recommends && apt-get clean
+RUN apk add --no-cache \
+  chromium \
+  nss \
+  freetype \
+  harfbuzz \
+  ca-certificates \
+  ttf-freefont \
+  nodejs \
+  yarn
 
-# Add user for puppeteer
-RUN groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
-    && mkdir -p /home/pptruser/Downloads \
-    && chown -R pptruser:pptruser /home/pptruser
+# Set environment variables
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
 
-ENV PUPPETEER_SKIP_DOWNLOAD=false
-
-# Install puppeteer and your app
+# Create app directory
 WORKDIR /app
+
+# Copy package files and install
 COPY package*.json ./
 RUN npm install
 
+# Copy the rest of the code
 COPY . .
 
-# Use non-root user
-USER pptruser
-
-EXPOSE 3000
-
+# Run app
 CMD ["node", "server.js"]
