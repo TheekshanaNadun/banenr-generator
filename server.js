@@ -10,18 +10,24 @@ app.post('/generate', async (req, res) => {
   if (!html) return res.status(400).send('Missing HTML');
 
   try {
-  const browser = await puppeteer.launch({
-  executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-  args: ['--no-sandbox', '--disable-setuid-sandbox'],
-  headless: true,
-});
+    const browser = await puppeteer.launch({
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined, // fallback to bundled Chromium if env var missing
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      headless: true,
+    });
 
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+
+    console.info('[INFO] Setting page content');
+    // Change waitUntil to 'domcontentloaded' to avoid hang if resources never finish loading
+    await page.setContent(html, { waitUntil: 'domcontentloaded' });
+
+    console.info('[INFO] Taking screenshot');
     const buffer = await page.screenshot({ type: 'png', fullPage: true });
 
     await browser.close();
 
+    console.info('[INFO] Sending response');
     res.set('Content-Type', 'image/png');
     res.send(buffer);
   } catch (err) {
