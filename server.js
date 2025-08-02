@@ -24,8 +24,8 @@ app.post('/generate', async (req, res) => {
     });
 
     const page = await browser.newPage();
-    console.info('[INFO] Navigating to about:blank');
-    await page.goto('about:blank');
+
+    // Removed the problematic page.goto('about:blank')
 
     console.info('[INFO] Setting HTML content');
     await page.setContent(html, { waitUntil: 'domcontentloaded' });
