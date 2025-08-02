@@ -1,7 +1,9 @@
 FROM node:18-alpine
 
-# Install Chromium and all required dependencies for Puppeteer
-RUN apk add --no-cache \
+# Enable community repo for missing packages
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/v3.21/community" >> /etc/apk/repositories
+
+RUN apk update && apk add --no-cache \
     chromium \
     nss \
     freetype \
@@ -13,7 +15,7 @@ RUN apk add --no-cache \
     bash \
     chromium-chromedriver \
     alsa-lib \
-    atk \
+    atk-dev \
     cairo \
     cups-libs \
     dbus-libs \
@@ -23,7 +25,7 @@ RUN apk add --no-cache \
     gdk-pixbuf \
     giflib \
     glib \
-    gst-plugins-base-libs \
+    gst-plugins-base \
     harfbuzz-icu \
     icu-libs \
     jpeg \
@@ -46,16 +48,3 @@ RUN apk add --no-cache \
     pulseaudio \
     ttf-freefont \
     && rm -rf /var/cache/apk/*
-
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm install
-
-COPY . .
-
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
-EXPOSE 3000
-
-CMD ["node", "server.js"]
