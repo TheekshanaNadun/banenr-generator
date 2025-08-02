@@ -1,39 +1,35 @@
 FROM node:18-bullseye
 
-# Install dependencies required for wkhtmltopdf
+# Install dependencies for wkhtmltoimage
 RUN apt-get update && apt-get install -y \
-    wget \
-    xz-utils \
-    fontconfig \
-    libfreetype6 \
-    libjpeg62-turbo \
-    libx11-6 \
-    libxcb1 \
-    libxext6 \
-    libxrender1 \
-    libglib2.0-0 \
-    libssl1.1 || true
+  wget \
+  xz-utils \
+  fontconfig \
+  libfreetype6 \
+  libjpeg62-turbo \
+  libx11-6 \
+  libxcb1 \
+  libxext6 \
+  libxrender1 \
+  libssl1.1 \
+  libglib2.0-0
 
 # Download and install wkhtmltox
-RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bullseye_amd64.deb && \
-    dpkg -i wkhtmltox_0.12.6.1-3.bullseye_amd64.deb || apt-get install -f -y && \
-    rm wkhtmltox_0.12.6.1-3.bullseye_amd64.deb
+RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bullseye_amd64.deb \
+  && dpkg -i wkhtmltox_0.12.6.1-3.bullseye_amd64.deb || true \
+  && apt-get install -f -y \
+  && rm wkhtmltox_0.12.6.1-3.bullseye_amd64.deb
 
-RUN if [ -f /opt/wkhtmltox/bin/wkhtmltoimage ]; then \
-      ln -s /opt/wkhtmltox/bin/wkhtmltoimage /usr/bin/wkhtmltoimage; \
-    fi
-# Set work directory
+# ✅ Ensure wkhtmltoimage is in PATH
+RUN ln -s $(which wkhtmltoimage) /usr/bin/wkhtmltoimage || true
+
+# Copy your files
 WORKDIR /app
-
-# Copy package files and install dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy rest of the app
 COPY . .
 
-# Expose port (important for CapRover)
-EXPOSE 3000
+# Install node modules
+RUN npm install
 
-# Start the server
+# Expose port and run the server
+EXPOSE 3000
 CMD ["node", "server.js"]
