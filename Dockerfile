@@ -19,6 +19,9 @@ RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/w
     dpkg -i wkhtmltox_0.12.6.1-3.bullseye_amd64.deb || apt-get install -f -y && \
     rm wkhtmltox_0.12.6.1-3.bullseye_amd64.deb
 
+RUN if [ -f /opt/wkhtmltox/bin/wkhtmltoimage ]; then \
+      ln -s /opt/wkhtmltox/bin/wkhtmltoimage /usr/bin/wkhtmltoimage; \
+    fi
 # Set work directory
 WORKDIR /app
 
