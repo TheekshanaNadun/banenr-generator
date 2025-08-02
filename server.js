@@ -1,24 +1,23 @@
 const express = require('express');
-const puppeteer = require('puppeteer-core');
-const app = express();
+const puppeteer = require('puppeteer');
 
+const app = express();
 app.use(express.json({ limit: '10mb' }));
 
 app.post('/generate', async (req, res) => {
-  console.info('[INFO] /generate route hit');
   const { html } = req.body;
-  console.info('[INFO] Received HTML length:', html?.length);
-
   if (!html) return res.status(400).send('Missing HTML');
 
   try {
     const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
       headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'networkidle0' });
+
     const buffer = await page.screenshot({ type: 'png', fullPage: true });
 
     await browser.close();
