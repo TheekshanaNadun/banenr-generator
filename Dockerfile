@@ -1,6 +1,5 @@
 FROM node:18-alpine
 
-# Enable community repo for missing packages
 RUN echo "https://dl-cdn.alpinelinux.org/alpine/v3.21/community" >> /etc/apk/repositories
 
 RUN apk update && apk add --no-cache \
@@ -15,7 +14,7 @@ RUN apk update && apk add --no-cache \
     bash \
     chromium-chromedriver \
     alsa-lib \
-    atk-dev \
+    atk \
     cairo \
     cups-libs \
     dbus-libs \
@@ -41,7 +40,6 @@ RUN apk update && apk add --no-cache \
     libxinerama \
     libxrandr \
     libxrender \
-    libxss \
     libxtst \
     mesa-gl \
     pango \
