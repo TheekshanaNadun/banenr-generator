@@ -15,5 +15,6 @@ RUN apt-get update && apt-get install -y \
 
 # Download and install wkhtmltox package (updated link)
 RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bullseye_amd64.deb \
-    && dpkg -i wkhtmltox_0.12.6.1-3.bullseye_amd64.deb \
-    && rm wkhtmltox_0.12.6.1-3.bullseye_amd
+  && dpkg -i wkhtmltox_0.12.6.1-3.bullseye_amd64.deb || true \
+  && apt-get install -f -y \
+  && rm wkhtmltox_0.12.6.1-3.bullseye_amd64.deb
