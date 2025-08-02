@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:18-bullseye
 
 # Install necessary dependencies for Chromium (bundled by Puppeteer)
 RUN apk add --no-cache \
